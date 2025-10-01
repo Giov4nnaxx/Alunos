@@ -4,44 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Lista de Alunos</title>
 </head>
 
 <body>
-    <h1>Cadastro de Aluno</h1>
-    <form id="form-aluno">
-        <label for="">Nome *:
-            <input type="text" name="nome" placeholder="Digite seu Nome" required>
-        </label>
-        <div>
-            <label for="">CPF * (somente números):
-                <input type="text" cpf="cpf" placeholder="Digite seu CPF" required>
-            </label>
-        </div>
-        <label for="">CEP:
-            <input type="text" cep="cep" placeholder="Digite seu CEP">
-        </label>
-        <div>
-            <label for="">UF:
-                <input type="text" uf="uf" placeholder="Digite o Uf">
-            </label>
-        </div>
-        <label for="">Rua:
-            <input type="text" rua="rua" placeholder="Digite a Rua">
-        </label>
-        <div>
-            <label for="">Número:
-                <input type="text" numero="numero" placeholder="Digite o Número">
-            </label>
-        </div>
-        <label for="">Complemento:
-            <input type="text" complemento="complemento" placeholder="Digite o Complemento">
-        </label>
-        <div>
-            <button id="enviar" type="submit">Enviar</button>
-            <button type="submit">Limpar</button>
-    </form>
-
+    <a href="cadastrar.html">Cadastrar</a>
+    <a href="editar.html">Editar</a>
+    
     <h2>Lista de Alunos</h2>
 
     <table border="1" cellpadding="6" cellspacing="0">
@@ -55,24 +24,26 @@
                 <th>RUA</th>
                 <th>NÚMERO</th>
                 <th>COMPLEMENTO</th>
+                <th>AÇÕES</th>
+                <button></button>
             </tr>
         </thead>
-          <tbody id="tbody">
-        <tr>
-            <td>1</td>
-            <td>Giovanna</td>
-            <td>24504827412</td>
-            <td>09087457</td>
-            <td>BA</td>
-            <td>Rua Berimbau</td>
-            <td>69</td>
-            <td></td>
-        </tr>
+        <tbody id="tbody">
+            <tr>
+                <td>1</td>
+                <td>Giovanna</td>
+                <td>24504827412</td>
+                <td>09087457</td>
+                <td>BA</td>
+                <td>Rua Berimbau</td>
+                <td>69</td>
+                <td></td>
+            </tr>
 
-        <tr>
-            <td>Carregando...</td>
-        </tr>
-    </tbody>
+            <tr>
+                <td>Carregando...</td>
+            </tr>
+        </tbody>
     </table>
     <script src="./app.js"></script>
 </body>

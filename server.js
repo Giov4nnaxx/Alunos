@@ -1,8 +1,12 @@
 // importando express
 const express = require("express");
 const mysql = require("mysql2/promise");
+const cors = require("cors");
+
+// cria aplicação
 const app = express();
 app.use(express.json());
+app.use(cors());
 const porta = 3000;
 
 const conexao = mysql.createPool({
@@ -14,18 +18,6 @@ const conexao = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
-})
-
-
-app.get("/alunos", async (req, res) => {
-    try {
-        const [retorno] = await conexao.query("SELECT * FROM alunos")
-        //console.log(retorno)
-        res.status(200).json(retorno)
-    } catch (erro) {
-        console.log(erro);
-        res.status(500).json({ erro: "Erro ao buscar alunos" })
-    }
 })
 
 app.post("/alunos", async (req, res) => {
@@ -44,20 +36,6 @@ app.post("/alunos", async (req, res) => {
         res.status(500).json({ erro: "Erro ao inserir o aluno" })
     }
 })
-// http://localhost:3000/alunos/2
-app.get("/alunos/:id", (req, res) => {
-    const id = parseInt(req.params.id)
-    const aluno = alunos.find((aluno => aluno.id === id))
-
-    if (aluno) {
-        res.json(aluno)
-    } else {
-        res.status(404).json(
-            { erro: "Aluno não encontrado" }
-        )
-    }
-
-})
 
 function validarAluno({ nome, cpf, cep, uf, rua, numero }) {
     if (!nome) return "Nome é obrigatório";
@@ -73,72 +51,57 @@ function validarAluno({ nome, cpf, cep, uf, rua, numero }) {
     return null;
 }
 
-app.post("/alunos", (req, res) => {
-    const { nome, cpf, cep, uf, rua, numero, complemento } = req.body;
-    const erro = validarAluno({ nome, cpf, cep, uf, rua, numero });
-    if (erro) return res.status(400).json({ erro });
-
-    const cpfRep = alunos.find(cpfRep => cpfRep.cpf === cpf)
-    if (cpfRep) {
-        return res.status(409).json({
-            erro: "CPF já cadastrado"
-        })
+app.get("/alunos", async (req, res) => {
+    try {
+        const [retorno] = await conexao.query(`SELECT * FROM alunos `)
+        res.status(200).json(retorno)
+    } catch (erro) {
+        console.log(erro);
+        res.status(500).json({ erro: "Erro ao buscar alunos" })
     }
-    const id = alunos.length > 0 ? alunos[alunos.length - 1].id + 1 : 1
-    const novoAluno = { id, nome, cpf, cep, uf, rua, numero, complemento }
-    alunos.push(novoAluno)
-    res.status(201).json({
-        mensagem: "Aluno Cadastrado com sucesso",
-        aluno: novoAluno
-    })
 })
 
-app.put("/alunos/:id", (req, res) => {
-    const id = parseInt(req.params.id)
-    const { nome, cpf, cep, uf, rua, numero, complemento } = req.body;
-    const aluno = alunos.find(aluno => aluno.id === id)
-    if (!aluno) {
-        return res.status(400).json({
-            erro: "Aluno não encontrado"
-        })
+app.get("/alunos/:id", async (req, res) => {
+    const id = req.params.id
+    try {
+        const [retorno] = await conexao.query(`SELECT * FROM alunos WHERE id= ${id}`)
+        res.status(200).json(retorno)
+    } catch (erro) {
+        console.log(erro);
+        res.status(500).json({ erro: "Erro ao buscar alunos" })
     }
-    const erro = validarAluno({ nome, cpf, cep, uf, rua, numero });
-    if (erro) return res.status(400).json({ erro });
-
-    const cpfRep = alunos.find(cpfRep => cpfRep.cpf === cpf && cpfRep.id !== id)
-    if (cpfRep) {
-        return res.status(409).json({
-            erro: "CPF já cadastrado"
-        })
-    }
-    aluno.nome = nome;
-    aluno.cpf = cpf;
-    aluno.cep = cep;
-    aluno.uf = uf;
-    aluno.rua = rua;
-    aluno.numero = numero;
-    aluno.complemento = complemento;
-    res.json({
-        mensagem: "Aluno Atualizado com sucesso"
-    })
 })
 
-app.delete("/alunos/:id", (req, res) => {
-    const id = parseInt(req.params.id);
-
-    const indice = alunos.findIndex(a => a.id === id)
-
-    if (indice === -1) {
-        return res.status(404).json({
-            mensagem: "Aluno não encontrado"
-        })
+app.put("/alunos/:id", async (req, res) => {
+    const id = req.params.id;
+    const { nome, cpf, cep, uf, rua, numero, complemento } = req.body;
+    try {
+        const [resultado] = await conexao.query(
+            "UPDATE alunos SET nome=?, cpf=?, cep=?, uf=?, rua=?, numero=?, complemento=? WHERE id=?",
+            [nome, cpf, cep, uf, rua, numero, complemento, id]
+        );
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ erro: "Aluno não encontrado" });
+        }
+        res.json({ mensagem: "Aluno atualizado com sucesso" });
+    } catch (erro) {
+        console.error(erro);
+        res.status(500).json({ erro: "Erro ao atualizar aluno" });
     }
-    alunos.splice(indice, 1);
-
-    res.status(200).json({
-        mensagem: "Aluno Deletado com sucesso"
-    })
 });
 
+app.delete("/alunos/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    try {
+        const [resultado] = await conexao.query("DELETE FROM alunos WHERE id = ?", [id]);
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ mensagem: "Aluno não encontrado" });
+        }
+        res.status(200).json({ mensagem: "Aluno Deletado com sucesso" });
+    } catch (erro) {
+        console.error(erro);
+        res.status(500).json({ erro: "Erro ao deletar aluno" });
+    }
+});
 
 app.listen(porta, () => console.log(`Servidor rodando http://localhost:${porta}/`));
